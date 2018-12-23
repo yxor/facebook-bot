@@ -1,6 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.options import Options
+
+
 from utils import *
 
 import time
@@ -10,9 +13,10 @@ import random
 
 class Account:
 
-	def __init__(self, webdriver_path=None):
-
-		self.browser = webdriver.Chrome(webdriver_path)
+	def __init__(self, CHROMEDRIVER_PATH=None, DEBUGGING=False):
+		options = Options()
+		options.headless = not DEBUGGING
+		self.browser = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=options)
 		self.authenticated = False
 		self.id = None
 		self.email = None
@@ -32,7 +36,7 @@ class Account:
 			self.email = email
 			self.password = password
 			self.authenticated = True
-			time.sleep(3)
+			time.sleep(5)
 			try:		
 				self.browser.get("https://m.facebook.com/profile.php")
 				elem = self.browser.find_element_by_css_selector('a[href*="/allactivity"]')
@@ -41,6 +45,7 @@ class Account:
 				raise Exception("cannot get account id")
 		except Exception as e:
 			print(f"Authentication Failed: {e}")
+			self.exit()
 
 
 	def post_profile(self, text):
@@ -49,10 +54,13 @@ class Account:
 			if not self.authenticated:
 				raise(Exception("not authenticated"))
 			self.browser.get("https://m.facebook.com/")
+			time.sleep(2)
 			self.browser.find_element_by_xpath('//div[@role="textbox"]').click()
 			textbox = WebDriverWait(self.browser, 10).until(lambda browser: browser.find_element_by_tag_name('textarea'))
+			time.sleep(3)
 			textbox = self.browser.find_element_by_tag_name('textarea')
 			textbox.send_keys(text)
+			time.sleep(3)
 			textbox.submit()
 
 			time.sleep(5)
@@ -142,14 +150,26 @@ class Account:
 			print(f"Accepting Friend requests failed: {e}")
 
 	
-	def get_post_IDs_from_group(self, group_id):
+	def get_post_IDs_from_group(self, group_id, depth=0):
 		"""returns a list of the first post ids on a group"""
 		try:
 			if not self.authenticated:
 				raise Exception("not authenticated")
-					
-			self.browser.get(f"https://m.facebook.com/groups/{group_id}")	
 			
+			self.browser.get(f"https://m.facebook.com/groups/{group_id}")
+			time.sleep(1)
+			old_height = self.browser.execute_script("return document.body.scrollHeight")
+			cur = 0
+
+			while cur < depth:
+				self.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+				time.sleep(6)
+				new_height = self.browser.execute_script("return document.body.scrollHeight")
+				if new_height == old_height:
+					break
+				old_height = new_height
+				cur += 1
+
 			posts = self.browser.find_elements_by_css_selector('article[data-dedupekey]')
 
 			IDs = []
@@ -245,31 +265,33 @@ class Account:
 			print(f"Getting groups failed: {e}")
 
 	
-	def get_most_recent_conversations(self, number_of_conversations):
+	def get_most_recent_conversations(self, depth=0):
 		""" returns a list of IDs of the nth users that the account had converstations with """
 		try:
 			if not self.authenticated:
 					raise Exception("not authenticated")
-			self.browser.get("https://m.facebook.com/messages")
+			self.browser.get("https://m.facebook.com/messages/")
+			cur = 0
+			conversations = []	
 
-			conversations = []		
-			while len(conversations) < number_of_conversations:
-				#/messages/?pageNum
-				see_more = self.browser.find_elements_by_css_selector('a[href^="/messages/?pageNum"]')
-				if len(see_more) == 0:
+			while cur < depth:
+				try:
+					see_more = self.browser.find_element_by_css_selector('div[id="see_older_threads"] > a')
+					see_more.click()
+					cur += 1
+					time.sleep(3)
+				except:
 					break
-				see_more[0].click()
-				time.sleep(3)
-				#<a href="/messages/read/?tid=cid.c.100030455341220%3A100031212201704&>
-				conversations = self.browser.find_elements_by_css_selector('a[href^="/messages/read/"]')
+			
+			
+			#id="threadlist_row_other_user_fbid_100002156320758"
+			conversations = self.browser.find_elements_by_css_selector('div[id*="threadlist_row_other_user_fbid"]')
 
 			
 			infos = []	
 			for convo in conversations:
-				href = convo.get_attribute("href")
-				extracted = getStringBetween(href, "?tid=cid.c.", "%")
-				extracted.replace("facebook.com/messages/read/?tid=", "")
-				extracted = extracted.split("&")[0]
+				href = convo.get_attribute("id")
+				extracted = href.split("_")[-1]
 				infos.append(extracted)			
 
 			return infos
@@ -285,13 +307,13 @@ class Account:
 			if not self.authenticated:
 				raise Exception("not authenticated")
 			self.browser.get(f"https://m.facebook.com/messages/read/?tid={user_id}")	
-			time.sleep(2)
+			time.sleep(5)
 			cur_page = 0		
 			while cur_page < depth:
 				try:
 					button = self.browser.find_element_by_css_selector('div[id="see_older"] > a')
 					button.click()
-					time.sleep(1.5)
+					time.sleep(3)
 					cur_page += 1
 				except:
 					print("all convos have loaded")
@@ -377,3 +399,8 @@ class Account:
 
 		except Exception as e:
 			print(f"Making comment on the post {post_id} in {group_id} Failed: {e}")
+
+
+	def exit(self):
+		"""terminate the bot and the webdrive executable"""
+		self.browser.quit()
