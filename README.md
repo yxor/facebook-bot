@@ -5,7 +5,7 @@ without the use of the offical API
 
 ## Getting Started
 
-** You need the language of the account you're using to be English(US), otherwise the program will not run **
+ __You need the language of the account you're using to be English(US), otherwise the program will not run.__
 
 ### Prerequisites
 
@@ -54,8 +54,8 @@ acc.exit()
 
 ## Built With
 
-* [selenium](http://www.dropwizard.io/1.0.2/docs/)
+* [selenium](https://selenium-python.readthedocs.io/)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
