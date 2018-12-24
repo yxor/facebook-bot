@@ -2,8 +2,6 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.options import Options
-
-
 from utils import *
 
 import time
@@ -13,9 +11,9 @@ import random
 
 class Account:
 
-	def __init__(self, CHROMEDRIVER_PATH=None, DEBUGGING=False):
+	def __init__(self, CHROMEDRIVER_PATH=None, headless=True):
 		options = Options()
-		options.headless = not DEBUGGING
+		options.headless = headless
 		self.browser = webdriver.Chrome(CHROMEDRIVER_PATH, chrome_options=options)
 		self.authenticated = False
 		self.id = None
