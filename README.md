@@ -1,6 +1,6 @@
 # Facebook Handler
 
-A python library made with selenium webdrive to control a facebook account
+A python library made with selenium to control a facebook account
 without the use of the offical API
 
 ## Getting Started
