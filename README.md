@@ -18,9 +18,10 @@ You can get the chromewebdriver from [here](https://sites.google.com/a/chromium.
 ### Installing
 
 Clone the library or download it to your machine.
-'''
+
+```
 pip install facebookHandler
-'''
+```
 
 ## Running the program
 
