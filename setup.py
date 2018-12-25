@@ -2,8 +2,8 @@ from distutils.core import setup
 
 
 setup(
-    name = 'facebook-handler',
-    packages = ['facebook-handler'],
+    name = 'facebookHandler',
+    packages = ['facebookHandler'],
     version = '0.1',
     license = 'MIT',
     description = 'A python library made with selenium to control a facebook account \
