@@ -9,10 +9,7 @@ without the use of the offical API
 
 ### Prerequisites
 
-You need to have the selenium library and the chromewebdriver on your computer:
-```
-pip install selenium
-```
+You need to have the chromewebdriver on your computer:
 
 You can get the chromewebdriver from [here](https://sites.google.com/a/chromium.org/chromedriver/downloads). 
 
@@ -21,13 +18,16 @@ You can get the chromewebdriver from [here](https://sites.google.com/a/chromium.
 ### Installing
 
 Clone the library or download it to your machine.
+'''
+pip install facebookHandler
+'''
 
 ## Running the program
 
 ### Authenticating to a facebook account
 
 ```python
-from account import Account
+from facebookHandler.account import Account
 
 # run as headless if you want to to see the chrome gui
 acc = Account("PATH/TO/CHROMEWEBDRIVE/BINARY.exe", headless=False) 
